@@ -3,20 +3,20 @@
 namespace Modules\Subscription\Listeners;
 
 use Modules\Auth\Events\UserRegistered;
+use Modules\Subscription\Contracts\SubscriptionServiceInterface;
 use Modules\Subscription\Models\Plan;
-use Modules\Subscription\Models\UserSubscription;
 
 class CreateFreeSubscription
 {
+    public function __construct(
+        private readonly SubscriptionServiceInterface $subscriptions,
+    ) {
+    }
+
     public function handle(UserRegistered $event): void
     {
         $freePlan = Plan::where('slug', 'free')->firstOrFail();
 
-        UserSubscription::create([
-            'user_id' => $event->user->id,
-            'plan_id' => $freePlan->id,
-            'status' => 'active',
-            'started_at' => now(),
-        ]);
+        $this->subscriptions->createSubscription($event->user, $freePlan);
     }
 }

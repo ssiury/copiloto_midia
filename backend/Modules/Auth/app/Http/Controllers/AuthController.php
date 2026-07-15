@@ -9,12 +9,12 @@ use Modules\Auth\Http\Requests\LoginRequest;
 use Modules\Auth\Http\Requests\RegisterRequest;
 use Modules\Auth\Http\Resources\AuthResource;
 use Modules\Auth\Http\Resources\UserResource;
-use Modules\Auth\Services\AuthService;
+use Modules\Auth\Contracts\AuthServiceInterface;
 
 class AuthController extends Controller
 {
     public function __construct(
-        private readonly AuthService $authService,
+        private readonly AuthServiceInterface $authService,
     ) {
     }
 

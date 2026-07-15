@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\VerifyInternalApiKey;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Modules\Subscription\Http\Middleware\CheckPlanLimit;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'plan.limit' => CheckPlanLimit::class,
+            'internal.key' => VerifyInternalApiKey::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
