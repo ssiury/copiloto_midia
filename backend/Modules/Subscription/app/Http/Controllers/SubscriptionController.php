@@ -3,54 +3,26 @@
 namespace Modules\Subscription\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Modules\Subscription\Http\Resources\SubscriptionResource;
+use Modules\Subscription\Services\PlanService;
 
 class SubscriptionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        return view('subscription::index');
+    public function __construct(
+        private readonly PlanService $planService,
+    ) {
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function me(Request $request): JsonResponse
     {
-        return view('subscription::create');
+        $summary = $this->planService->summaryFor($request->user());
+
+        abort_if(! $summary, 404);
+
+        return (new SubscriptionResource($summary))
+            ->additional(['meta' => (object) []])
+            ->response();
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('subscription::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('subscription::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
 }
