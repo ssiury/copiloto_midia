@@ -1,5 +1,7 @@
 import axios from 'axios'
 
+const TOKEN_STORAGE_KEY = 'auth_token'
+
 const http = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: {
@@ -7,13 +9,29 @@ const http = axios.create({
   },
 })
 
-// Interceptor de requisição: preenchido na Entrega 1 com o token de autenticação.
-http.interceptors.request.use((config) => config)
+http.interceptors.request.use((config) => {
+  const token = localStorage.getItem(TOKEN_STORAGE_KEY)
 
-// Interceptor de resposta: preenchido na Entrega 1 com o tratamento de erro 401.
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+
+  return config
+})
+
 http.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject(error),
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem(TOKEN_STORAGE_KEY)
+
+      if (window.location.pathname !== '/login') {
+        window.location.assign('/login')
+      }
+    }
+
+    return Promise.reject(error)
+  },
 )
 
 export default http
