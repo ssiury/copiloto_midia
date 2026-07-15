@@ -6,12 +6,13 @@ use App\Models\User;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Modules\Auth\Contracts\AuthServiceInterface;
 use Modules\Auth\Events\UserRegistered;
 use Modules\Auth\Exceptions\InvalidCredentialsException;
 use Modules\Auth\Exceptions\TooManyLoginAttemptsException;
 use Modules\Auth\Repositories\UserRepositoryInterface;
 
-class AuthService
+class AuthService implements AuthServiceInterface
 {
     private const MAX_LOGIN_ATTEMPTS = 5;
 

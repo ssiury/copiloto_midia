@@ -4,8 +4,10 @@ namespace Modules\Auth\Providers;
 
 use Nwidart\Modules\Support\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
+use Modules\Auth\Contracts\AuthServiceInterface;
 use Modules\Auth\Repositories\EloquentUserRepository;
 use Modules\Auth\Repositories\UserRepositoryInterface;
+use Modules\Auth\Services\AuthService;
 
 class AuthServiceProvider extends ModuleServiceProvider
 {
@@ -42,6 +44,7 @@ class AuthServiceProvider extends ModuleServiceProvider
     public function register(): void
     {
         $this->app->bind(UserRepositoryInterface::class, EloquentUserRepository::class);
+        $this->app->bind(AuthServiceInterface::class, AuthService::class);
 
         parent::register();
     }

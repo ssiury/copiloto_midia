@@ -3,11 +3,12 @@
 namespace Modules\Subscription\Services;
 
 use App\Models\User;
+use Modules\Subscription\Contracts\PlanServiceInterface;
 use Modules\Subscription\Models\Plan;
 use Modules\Subscription\Models\PlanLimit;
 use Modules\Subscription\Models\UserSubscription;
 
-class PlanService
+class PlanService implements PlanServiceInterface
 {
     public function activeSubscription(User $user): ?UserSubscription
     {

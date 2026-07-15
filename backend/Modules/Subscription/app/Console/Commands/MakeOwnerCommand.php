@@ -6,8 +6,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Modules\Auth\Repositories\UserRepositoryInterface;
+use Modules\Subscription\Contracts\SubscriptionServiceInterface;
 use Modules\Subscription\Models\Plan;
-use Modules\Subscription\Models\UserSubscription;
 
 class MakeOwnerCommand extends Command
 {
@@ -17,6 +17,7 @@ class MakeOwnerCommand extends Command
 
     public function __construct(
         private readonly UserRepositoryInterface $users,
+        private readonly SubscriptionServiceInterface $subscriptions,
     ) {
         parent::__construct();
     }
@@ -58,12 +59,7 @@ class MakeOwnerCommand extends Command
             'user_type' => 'owner',
         ]);
 
-        UserSubscription::create([
-            'user_id' => $user->id,
-            'plan_id' => $ownerPlan->id,
-            'status' => 'active',
-            'started_at' => now(),
-        ]);
+        $this->subscriptions->createSubscription($user, $ownerPlan);
 
         $this->info("Usuário owner criado com sucesso: {$email}");
 

@@ -4,14 +4,14 @@ namespace Modules\Subscription\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Modules\Subscription\Contracts\PlanServiceInterface;
 use Modules\Subscription\Exceptions\PlanLimitReachedException;
-use Modules\Subscription\Services\PlanService;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckPlanLimit
 {
     public function __construct(
-        private readonly PlanService $planService,
+        private readonly PlanServiceInterface $planService,
     ) {
     }
 
