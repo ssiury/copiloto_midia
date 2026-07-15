@@ -3,54 +3,58 @@
 namespace Modules\Auth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Modules\Auth\Http\Requests\LoginRequest;
+use Modules\Auth\Http\Requests\RegisterRequest;
+use Modules\Auth\Http\Resources\AuthResource;
+use Modules\Auth\Http\Resources\UserResource;
+use Modules\Auth\Services\AuthService;
 
 class AuthController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        return view('auth::index');
+    public function __construct(
+        private readonly AuthService $authService,
+    ) {
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function register(RegisterRequest $request): JsonResponse
     {
-        return view('auth::create');
+        $user = $this->authService->register($request->validated());
+
+        return (new UserResource($user))
+            ->additional(['meta' => (object) []])
+            ->response()
+            ->setStatusCode(201);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
+    public function login(LoginRequest $request): JsonResponse
     {
-        return view('auth::show');
+        $result = $this->authService->login(
+            $request->string('email')->toString(),
+            $request->string('password')->toString(),
+            $request->throttleKey(),
+        );
+
+        return (new AuthResource($result))
+            ->additional(['meta' => (object) []])
+            ->response();
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
+    public function logout(Request $request): JsonResponse
     {
-        return view('auth::edit');
+        $this->authService->logout($request->user());
+
+        return response()->json([
+            'data' => (object) [],
+            'meta' => (object) [],
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
+    public function me(Request $request): JsonResponse
+    {
+        return (new UserResource($request->user()))
+            ->additional(['meta' => (object) []])
+            ->response();
+    }
 }
