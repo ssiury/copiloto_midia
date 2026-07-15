@@ -2,8 +2,10 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useSubscriptionStore } from '../stores/subscription'
 
 const authStore = useAuthStore()
+const subscriptionStore = useSubscriptionStore()
 const router = useRouter()
 const loading = ref(true)
 
@@ -12,6 +14,8 @@ onMounted(async () => {
     if (!authStore.user) {
       await authStore.fetchMe()
     }
+
+    await subscriptionStore.fetchSubscription()
   } finally {
     loading.value = false
   }
@@ -32,9 +36,35 @@ async function handleLogout() {
 
     <p v-if="loading">Carregando...</p>
 
-    <div v-else-if="authStore.user" class="panel p-3">
-      <p class="mb-1"><strong>Nome:</strong> {{ authStore.user.name }}</p>
-      <p class="mb-0"><strong>E-mail:</strong> {{ authStore.user.email }}</p>
-    </div>
+    <template v-else>
+      <div v-if="authStore.user" class="panel p-3 mb-3">
+        <p class="mb-1"><strong>Nome:</strong> {{ authStore.user.name }}</p>
+        <p class="mb-1"><strong>E-mail:</strong> {{ authStore.user.email }}</p>
+        <p class="mb-0"><strong>Tipo de usuário:</strong> {{ authStore.user.user_type }}</p>
+      </div>
+
+      <div v-if="subscriptionStore.subscription" class="panel p-3">
+        <h2 class="h5 mb-3">Plano e limites</h2>
+        <p class="mb-1"><strong>Plano atual:</strong> {{ subscriptionStore.subscription.plan.name }}</p>
+        <p class="mb-3">
+          <strong>Status da assinatura:</strong> {{ subscriptionStore.subscription.status }}
+        </p>
+
+        <p v-if="subscriptionStore.subscription.plan.is_unlimited" class="mb-0 text-muted">
+          Este plano não possui limites de uso.
+        </p>
+
+        <ul v-else class="list-unstyled mb-0">
+          <li
+            v-for="limit in subscriptionStore.subscription.limits"
+            :key="limit.resource"
+            class="d-flex justify-content-between border-bottom py-2"
+          >
+            <span class="text-capitalize">{{ limit.resource }}</span>
+            <span>{{ limit.used }} / {{ limit.unlimited ? '∞' : limit.limit }}</span>
+          </li>
+        </ul>
+      </div>
+    </template>
   </main>
 </template>

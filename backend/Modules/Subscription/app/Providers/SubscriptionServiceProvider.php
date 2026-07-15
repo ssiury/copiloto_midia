@@ -4,6 +4,7 @@ namespace Modules\Subscription\Providers;
 
 use Nwidart\Modules\Support\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
+use Modules\Subscription\Console\Commands\MakeOwnerCommand;
 
 class SubscriptionServiceProvider extends ModuleServiceProvider
 {
@@ -22,7 +23,9 @@ class SubscriptionServiceProvider extends ModuleServiceProvider
      *
      * @var string[]
      */
-    // protected array $commands = [];
+    protected array $commands = [
+        MakeOwnerCommand::class,
+    ];
 
     /**
      * Provider classes to register.
