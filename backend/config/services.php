@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'internal' => [
+        'key' => env('INTERNAL_API_KEY'),
+    ],
+
 ];
