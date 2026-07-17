@@ -1,14 +1,15 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import http from '../services/http'
+import { strings } from '../strings/pt-BR'
 
 const status = ref(null)
 const error = ref(null)
 
 const statusLabel = computed(() => {
-  if (error.value) return 'API indisponível'
-  if (!status.value) return 'Verificando...'
-  return 'API online'
+  if (error.value) return strings.home.badge.offline
+  if (!status.value) return strings.home.badge.checking
+  return strings.home.badge.online
 })
 
 onMounted(async () => {
@@ -20,46 +21,8 @@ onMounted(async () => {
   }
 })
 
-const features = [
-  {
-    icon: 'circle',
-    title: 'Stories automáticos',
-    text: 'Cria e publica stories a partir das suas fotos e vídeos, no melhor horário.',
-  },
-  {
-    icon: 'message',
-    title: 'WhatsApp integrado',
-    text: 'Sugere e envia respostas e avisos direto pelo WhatsApp da equipe.',
-  },
-  {
-    icon: 'grid',
-    title: 'Cronograma inteligente',
-    text: 'Organiza os avisos e publicações da semana e ajusta sozinho os horários.',
-  },
-  {
-    icon: 'chart',
-    title: 'Métricas em tempo real',
-    text: 'Acompanha alcance e engajamento sem sair do painel.',
-  },
-]
-
-const steps = [
-  {
-    number: 1,
-    title: 'Conecte suas contas',
-    text: 'Instagram, WhatsApp e o calendário do time em poucos cliques.',
-  },
-  {
-    number: 2,
-    title: 'Envie fotos e vídeos',
-    text: 'O copiloto sugere legendas, formatos de story e os melhores horários.',
-  },
-  {
-    number: 3,
-    title: 'Publique com aprovação',
-    text: 'O time revisa em um clique e tudo sai no horário certo.',
-  },
-]
+const features = strings.home.features.items
+const steps = strings.home.steps.items
 </script>
 
 <template>
@@ -67,15 +30,15 @@ const steps = [
     <header class="navbar">
       <div class="navbar__brand">
         <span class="navbar__dot" />
-        Copiloto de Mídia
+        {{ strings.common.brand }}
       </div>
       <nav class="navbar__links">
-        <a href="#recursos">Recursos</a>
-        <a href="#como-funciona">Como funciona</a>
+        <a href="#recursos">{{ strings.home.nav.features }}</a>
+        <a href="#como-funciona">{{ strings.home.nav.howItWorks }}</a>
       </nav>
       <div class="navbar__actions">
-        <RouterLink to="/login" class="btn btn--ghost btn--sm">Entrar</RouterLink>
-        <RouterLink to="/register" class="btn btn--primary btn--sm">Criar conta</RouterLink>
+        <RouterLink to="/login" class="btn btn--ghost btn--sm">{{ strings.home.nav.login }}</RouterLink>
+        <RouterLink to="/register" class="btn btn--primary btn--sm">{{ strings.home.nav.register }}</RouterLink>
       </div>
     </header>
 
@@ -83,21 +46,20 @@ const steps = [
       <div class="hero__text">
         <span class="badge" :class="{ 'badge--error': error, 'badge--pending': !status && !error }">
           <span class="badge__dot" />
-          {{ status || error ? 'Copiloto ativo agora' : statusLabel }}
+          {{ status || error ? strings.home.badge.active : statusLabel }}
         </span>
 
-        <h1 class="hero__title">Sua mídia social no piloto automático.</h1>
+        <h1 class="hero__title">{{ strings.home.hero.title }}</h1>
         <p class="hero__subtitle">
-          Stories, mensagens de WhatsApp e o cronograma de publicações do seu
-          time — organizados e sugeridos por IA, em um só lugar.
+          {{ strings.home.hero.subtitle }}
         </p>
 
         <div class="hero__actions">
-          <RouterLink to="/register" class="btn btn--primary">Começar agora</RouterLink>
-          <a href="#como-funciona" class="btn btn--ghost">Ver como funciona</a>
+          <RouterLink to="/register" class="btn btn--primary">{{ strings.home.hero.ctaPrimary }}</RouterLink>
+          <a href="#como-funciona" class="btn btn--ghost">{{ strings.home.hero.ctaSecondary }}</a>
         </div>
 
-        <p class="hero__note">USADO PELOS TIMES DE MARKETING E CONTEÚDO</p>
+        <p class="hero__note">{{ strings.home.hero.note }}</p>
       </div>
 
       <div class="hero__preview panel" aria-hidden="true">
@@ -108,13 +70,13 @@ const steps = [
         <div class="preview__row">
           <span class="preview__avatar" />
           <div>
-            <p class="preview__row-title">WhatsApp · Equipe Sul</p>
-            <p class="preview__row-sub">Sugestão de resposta enviada ✓</p>
+            <p class="preview__row-title">{{ strings.home.preview.contact }}</p>
+            <p class="preview__row-sub">{{ strings.home.preview.suggestionSent }}</p>
           </div>
           <span class="preview__status" />
         </div>
 
-        <p class="preview__label">STORIES AGENDADOS</p>
+        <p class="preview__label">{{ strings.home.preview.storiesLabel }}</p>
         <div class="preview__stories">
           <span class="preview__story" />
           <span class="preview__story" />
@@ -124,18 +86,17 @@ const steps = [
         <div class="preview__event">
           <span class="preview__event-icon" />
           <div>
-            <p class="preview__row-title">Hoje, 14:00 · Instagram</p>
-            <p class="preview__row-sub">Cronograma sugerido pela IA</p>
+            <p class="preview__row-title">{{ strings.home.preview.eventTime }}</p>
+            <p class="preview__row-sub">{{ strings.home.preview.eventLabel }}</p>
           </div>
         </div>
       </div>
     </main>
 
     <section id="recursos" class="section">
-      <h2 class="section__title">Tudo que seu time precisa</h2>
+      <h2 class="section__title">{{ strings.home.features.sectionTitle }}</h2>
       <p class="section__subtitle">
-        De stories a mensagens diretas, o copiloto cuida da rotina para o time
-        focar no conteúdo.
+        {{ strings.home.features.sectionSubtitle }}
       </p>
 
       <div class="features">
@@ -148,9 +109,9 @@ const steps = [
     </section>
 
     <section id="como-funciona" class="section">
-      <h2 class="section__title">Como funciona</h2>
+      <h2 class="section__title">{{ strings.home.steps.sectionTitle }}</h2>
       <p class="section__subtitle">
-        Três passos para o time todo publicar sem esforço.
+        {{ strings.home.steps.sectionSubtitle }}
       </p>
 
       <div class="steps">
@@ -163,8 +124,8 @@ const steps = [
     </section>
 
     <footer class="footer">
-      <span>Copiloto de Mídia</span>
-      <span>© 2026 Copiloto de Mídia</span>
+      <span>{{ strings.common.brand }}</span>
+      <span>{{ strings.home.footer.copyright }}</span>
     </footer>
   </div>
 </template>
