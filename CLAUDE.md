@@ -21,8 +21,11 @@ para código novo:
   `src/strings/pt-BR.js` — **nenhuma string literal de texto visível ao
   usuário dentro de um `.vue`**.
 
-Ver `docs/architecture.md` para o estado atual real do código (o que já
-existe, o que ainda é scaffold, dívidas conhecidas).
+Ver `docs/estado-atual.md` para o estado atual real do código (o que já
+existe, o que ainda é scaffold, dívidas conhecidas — inclusive o módulo
+`Subscription`, que hoje está com classes faltando e não carrega). Ver
+`docs/architecture.md` para o plano de extração em microserviços
+(Entrega 3), um documento diferente com o mesmo tema.
 
 ## Regras de ouro (resumo)
 
