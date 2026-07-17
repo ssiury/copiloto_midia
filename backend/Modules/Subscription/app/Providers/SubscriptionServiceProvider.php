@@ -4,6 +4,11 @@ namespace Modules\Subscription\Providers;
 
 use Nwidart\Modules\Support\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
+use Modules\Subscription\Console\Commands\MakeOwnerCommand;
+use Modules\Subscription\Contracts\PlanServiceInterface;
+use Modules\Subscription\Contracts\SubscriptionServiceInterface;
+use Modules\Subscription\Services\PlanService;
+use Modules\Subscription\Services\SubscriptionService;
 
 class SubscriptionServiceProvider extends ModuleServiceProvider
 {
@@ -22,7 +27,9 @@ class SubscriptionServiceProvider extends ModuleServiceProvider
      *
      * @var string[]
      */
-    // protected array $commands = [];
+    protected array $commands = [
+        MakeOwnerCommand::class,
+    ];
 
     /**
      * Provider classes to register.
@@ -33,6 +40,17 @@ class SubscriptionServiceProvider extends ModuleServiceProvider
         EventServiceProvider::class,
         RouteServiceProvider::class,
     ];
+
+    /**
+     * Register the service provider.
+     */
+    public function register(): void
+    {
+        $this->app->bind(PlanServiceInterface::class, PlanService::class);
+        $this->app->bind(SubscriptionServiceInterface::class, SubscriptionService::class);
+
+        parent::register();
+    }
 
     /**
      * Define module schedules.

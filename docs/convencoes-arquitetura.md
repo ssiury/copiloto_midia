@@ -9,8 +9,10 @@
 > **Escopo**: aplica-se a código novo e já foi aplicado retroativamente ao
 > módulo `Modules/Auth`, que hoje segue 100% este documento — é a
 > **implementação de referência**: use os arquivos dele como modelo ao criar
-> `Subscription`/`App`. Ver `docs/architecture.md` para o estado atual real
-> do código (o "as is"); este documento é o "acordo daqui pra frente".
+> `App` (o `Subscription` já existe, mas foi implementado com o padrão
+> antigo — ver `docs/estado-atual.md`, seção "Pontas soltas"). Ver
+> `docs/estado-atual.md` para o estado atual real do código (o "as is");
+> este documento é o "acordo daqui pra frente".
 
 ---
 
@@ -222,7 +224,7 @@ Código novo não deve repetir esse padrão.
 
 Só exibe e coleta dado. Qualquer I/O (chamada HTTP, estado global) passa
 pela store Pinia — a view nunca chama `axios`/`http.js` direto (já é o
-padrão hoje, ver `docs/architecture.md`).
+padrão hoje, ver `docs/estado-atual.md`).
 
 **Nenhuma string literal voltada ao usuário dentro do `<template>` ou
 `<script>`** — todo texto vem do arquivo de strings.
@@ -292,7 +294,7 @@ título "Post do Culto de Sexta" são dado e ficam no componente).
 ### Store / camada de aplicação do front
 
 Sem mudança em relação ao que já está documentado em
-`docs/architecture.md`: a store Pinia (`stores/*.js`) cumpre o papel de
+`docs/estado-atual.md`: a store Pinia (`stores/*.js`) cumpre o papel de
 "application" do frontend (orquestra chamadas via `services/http.js` e
 guarda estado). Não existe (nem é necessário criar agora) uma camada de
 repository/service dedicada no frontend — para o tamanho atual do projeto
