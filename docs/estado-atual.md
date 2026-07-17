@@ -39,7 +39,7 @@ Módulos existentes:
 | Módulo | Status | O que faz |
 |---|---|---|
 | `Modules/Auth` | ✅ Implementado | Registro, login, logout, usuário autenticado. Segue a convenção `Application`/DTO (ver abaixo). |
-| `Modules/Subscription` | ⚠️ Implementado, mas **quebrado** | Planos/assinaturas (Entrega 2). Usa o padrão antigo (`Services/PlanService.php`, sem `Application`) **e** referencia classes que não existem — ver "Pontas soltas". |
+| `Modules/Subscription` | ✅ Implementado | Planos/assinaturas (Entrega 2). Usa o padrão antigo (`Services/PlanService.php`, sem `Application`/DTO) — ver "Pontas soltas". |
 | `Modules/App` | ⚠️ Só scaffold | Reservado para a regra de negócio principal (posts/agenda/etc.) — ainda não implementado |
 
 `app/` (fora de `Modules/`) é só o esqueleto padrão do Laravel: o `User`
@@ -163,9 +163,8 @@ Rate limit de login: 5 tentativas/min por IP+email, via
 
 Pest, em `tests/Feature/Auth/` (registro, login, logout, rota protegida,
 rate limit) e `tests/Feature/Subscription/` (assinatura Free automática,
-`make:owner`, `PlanService`) — essa segunda suíte **não roda** hoje, ver
-"Pontas soltas". Não há testes de `App` porque o módulo ainda não tem
-código de negócio.
+`make:owner`, `PlanService`) — 16 testes, todos passando. Não há testes de
+`App` porque o módulo ainda não tem código de negócio.
 
 ---
 
@@ -224,27 +223,24 @@ chegaram a rodar contra o Postgres de dev e apagar dados reais via
 - **`Modules/*/routes/web.php` e `resources/views/*.blade.php`** em todos os
   3 módulos são sobra do scaffold automático do `php artisan module:make`,
   não uma segunda forma de servir a aplicação (o front real é o Vue).
-- **`Modules/Subscription` está com classes faltando — vai dar erro fatal
-  ao carregar.** Vários arquivos importam/usam classes que não existem em
-  lugar nenhum do repositório:
-  - `Modules\Subscription\Contracts\PlanServiceInterface` — usada em
-    `SubscriptionController`, `CheckPlanLimit`, `SubscriptionServiceProvider`,
-    e declarada como `implements` em `PlanService.php` (isso sozinho já
-    impede a classe de carregar).
-  - `Modules\Subscription\Contracts\SubscriptionServiceInterface` — usada
-    em `CreateFreeSubscription`, `MakeOwnerCommand`,
-    `SubscriptionServiceProvider`.
-  - `Modules\Subscription\Services\SubscriptionService.php` — o arquivo
-    inteiro não existe, mas é importado e vinculado (`bind`) em
-    `SubscriptionServiceProvider::register()`.
-  - `Modules\Subscription\Http\Controllers\InternalSubscriptionController`
-    — usado em `routes/api.php`, arquivo não existe.
-
-  Isso não foi introduzido por este merge — já estava assim no
-  `origin/master`. Precisa de uma decisão explícita (recriar os arquivos
-  faltantes com base no que já é chamado, ou revisar o que o módulo
-  deveria fazer) antes de rodar `php artisan test` ou qualquer rota de
-  `/api/v1/subscription/*` — hoje isso derruba com "Class not found".
+- **`Modules/Subscription` estava com classes faltando no `origin/master`
+  (não introduzido por este merge) — corrigido aqui.** Vários arquivos
+  importavam/usavam classes que não existiam em lugar nenhum do
+  repositório: `Contracts\PlanServiceInterface`, `Contracts\SubscriptionServiceInterface`,
+  `Services\SubscriptionService.php` (o arquivo inteiro não existia, só
+  era importado/vinculado em `SubscriptionServiceProvider::register()`),
+  `Http\Controllers\InternalSubscriptionController` (usado em
+  `routes/api.php`) e `App\Http\Middleware\VerifyInternalApiKey` (usado em
+  `bootstrap/app.php`). Recriados com base no que já era chamado pelos
+  arquivos existentes (`PlanService.php`, `CheckPlanLimit`,
+  `CreateFreeSubscription`, `MakeOwnerCommand`, `routes/api.php`) e no
+  contrato descrito em `docs/architecture.md` — nenhuma regra de negócio
+  nova foi inventada além do que já estava referenciado. Único ponto sem
+  lastro nos testes: `registerPayment`/`PaymentData`/`Payment` (rotas
+  internas de pagamento) — implementado como stub que só loga o evento,
+  sem persistir em tabela própria (não existe migration de `payments`;
+  criar quando um gateway real for integrado, ver `docs/guia_projeto.md`
+  Entrega 3).
 - **`Subscription` usa `Services/PlanService.php` com o sentido antigo**
   (regra de negócio, sem `Application`, sem DTO) — não é pra copiar esse
   padrão em módulo novo, seguir `Auth` (ver
