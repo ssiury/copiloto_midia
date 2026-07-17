@@ -1,17 +1,20 @@
 <?php
 
-namespace Modules\Auth\Services;
+namespace Modules\Auth\Application;
 
 use App\Models\User;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Modules\Auth\Application\Data\LoginData;
+use Modules\Auth\Application\Data\LoginResult;
+use Modules\Auth\Application\Data\RegisterData;
 use Modules\Auth\Events\UserRegistered;
 use Modules\Auth\Exceptions\InvalidCredentialsException;
 use Modules\Auth\Exceptions\TooManyLoginAttemptsException;
 use Modules\Auth\Repositories\UserRepositoryInterface;
 
-class AuthService
+class AuthApplication
 {
     private const MAX_LOGIN_ATTEMPTS = 5;
 
@@ -23,12 +26,12 @@ class AuthService
     ) {
     }
 
-    public function register(array $data): User
+    public function register(RegisterData $data): User
     {
         $user = $this->users->create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'name' => $data->name,
+            'email' => $data->email,
+            'password' => Hash::make($data->password),
             'user_type' => 'free',
         ]);
 
@@ -37,42 +40,39 @@ class AuthService
         return $user;
     }
 
-    /**
-     * @return array{user: User, token: string}
-     */
-    public function login(string $email, string $password, string $throttleKey): array
+    public function login(LoginData $data): LoginResult
     {
-        if ($this->limiter->tooManyAttempts($throttleKey, self::MAX_LOGIN_ATTEMPTS)) {
-            $seconds = $this->limiter->availableIn($throttleKey);
+        if ($this->limiter->tooManyAttempts($data->throttleKey, self::MAX_LOGIN_ATTEMPTS)) {
+            $seconds = $this->limiter->availableIn($data->throttleKey);
 
             Log::channel('auth')->warning('Login bloqueado por rate limit', [
-                'email' => $email,
+                'email' => $data->email,
                 'retry_after' => $seconds,
             ]);
 
             throw new TooManyLoginAttemptsException($seconds);
         }
 
-        $user = $this->users->findByEmail($email);
+        $user = $this->users->findByEmail($data->email);
 
-        if (! $user || ! Hash::check($password, $user->password)) {
-            $this->limiter->hit($throttleKey, self::LOGIN_DECAY_SECONDS);
+        if (! $user || ! Hash::check($data->password, $user->password)) {
+            $this->limiter->hit($data->throttleKey, self::LOGIN_DECAY_SECONDS);
 
-            Log::channel('auth')->info('Tentativa de login falhou', ['email' => $email]);
+            Log::channel('auth')->info('Tentativa de login falhou', ['email' => $data->email]);
 
             throw new InvalidCredentialsException;
         }
 
-        $this->limiter->clear($throttleKey);
+        $this->limiter->clear($data->throttleKey);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         Log::channel('auth')->info('Login realizado com sucesso', [
-            'email' => $email,
+            'email' => $data->email,
             'user_id' => $user->id,
         ]);
 
-        return ['user' => $user, 'token' => $token];
+        return new LoginResult(user: $user, token: $token);
     }
 
     public function logout(User $user): void

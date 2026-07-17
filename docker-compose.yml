@@ -5,16 +5,13 @@ services:
       dockerfile: docker/php/Dockerfile
     volumes:
       - ./backend:/var/www/html
-    environment:
-      DB_CONNECTION: pgsql
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_DATABASE: ${DB_DATABASE}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      FRONTEND_URL: ${FRONTEND_URL}
+    # Sem `environment:` aqui de propósito: a app lê backend/.env (montado
+    # via volume acima), que já tem DB_HOST=postgres, REDIS_HOST=redis etc.
+    # Duplicar essas variáveis aqui como env var real do container quebra o
+    # phpunit.xml — o Laravel prioriza uma env var já presente no processo
+    # sobre o override de teste, então `php artisan test` acabava rodando
+    # contra o Postgres de dev de verdade (e o RefreshDatabase apagava os
+    # dados). Se precisar mudar host/porta do banco, edite backend/.env.
     depends_on:
       - postgres
       - redis

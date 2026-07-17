@@ -1,5 +1,6 @@
 <script setup>
 import { useThemeStore } from '../stores/theme'
+import { strings } from '../strings/pt-BR'
 
 const themeStore = useThemeStore()
 </script>
@@ -8,8 +9,8 @@ const themeStore = useThemeStore()
   <button
     type="button"
     class="theme-toggle"
-    :aria-label="themeStore.theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'"
-    :title="themeStore.theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'"
+    :aria-label="themeStore.theme === 'dark' ? strings.themeToggle.enableLight : strings.themeToggle.enableDark"
+    :title="themeStore.theme === 'dark' ? strings.themeToggle.enableLight : strings.themeToggle.enableDark"
     @click="themeStore.toggle()"
   >
     {{ themeStore.theme === 'dark' ? '☀️' : '🌙' }}
