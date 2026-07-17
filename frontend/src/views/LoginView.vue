@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { strings } from '../strings/pt-BR'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -19,7 +20,7 @@ async function handleSubmit() {
     await authStore.login({ email: email.value, password: password.value })
     router.push({ name: 'dashboard' })
   } catch (error) {
-    errorMessage.value = error.response?.data?.error?.message || 'Não foi possível fazer login.'
+    errorMessage.value = error.response?.data?.error?.message || strings.auth.login.genericError
   } finally {
     loading.value = false
   }
@@ -28,11 +29,11 @@ async function handleSubmit() {
 
 <template>
   <main class="narrow-page">
-    <h1 class="h3 mb-4">Entrar</h1>
+    <h1 class="h3 mb-4">{{ strings.auth.login.title }}</h1>
 
     <form @submit.prevent="handleSubmit">
       <div class="mb-3">
-        <label for="email" class="form-label">E-mail</label>
+        <label for="email" class="form-label">{{ strings.auth.login.emailLabel }}</label>
         <input
           id="email"
           v-model="email"
@@ -44,7 +45,7 @@ async function handleSubmit() {
       </div>
 
       <div class="mb-3">
-        <label for="password" class="form-label">Senha</label>
+        <label for="password" class="form-label">{{ strings.auth.login.passwordLabel }}</label>
         <input
           id="password"
           v-model="password"
@@ -58,12 +59,12 @@ async function handleSubmit() {
       <div v-if="errorMessage" class="alert alert-danger py-2">{{ errorMessage }}</div>
 
       <button type="submit" class="btn btn--primary btn--block" :disabled="loading">
-        {{ loading ? 'Entrando...' : 'Entrar' }}
+        {{ loading ? strings.auth.login.submitLoading : strings.auth.login.submit }}
       </button>
     </form>
 
     <p class="mt-3 text-center">
-      Não tem conta? <RouterLink to="/register">Cadastre-se</RouterLink>
+      {{ strings.auth.login.noAccount }} <RouterLink to="/register">{{ strings.auth.login.registerLink }}</RouterLink>
     </p>
   </main>
 </template>

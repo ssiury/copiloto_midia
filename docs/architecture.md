@@ -1,5 +1,12 @@
 # Arquitetura
 
+> Este documento é o plano de extração para microserviços (entregue na
+> Entrega 3 do `docs/guia_projeto.md`) — descreve para onde o monólito vai,
+> não o que já existe hoje. Para o estado atual real do código, ver
+> `docs/estado-atual.md`. Para as convenções de camadas (Request → Controller
+> → Application → Repository, DTOs, etc.) aplicadas a código novo, ver
+> `docs/convencoes-arquitetura.md`.
+
 ## Decisão: monólito modular
 
 O projeto começa como um monólito modular em Laravel, usando `nwidart/laravel-modules`
@@ -14,6 +21,13 @@ service de outro módulo — sempre de uma interface em `Modules\<Módulo>\Contr
 resolvida via container (bind feito no `<Módulo>ServiceProvider`). Isso é o que
 permite, no futuro, trocar o `bind` de uma implementação local por um client HTTP
 sem tocar em quem consome.
+
+> Exceção conhecida: `Auth` não segue esse padrão de interface-por-service — ele
+> usa `Application/AuthApplication.php` (regra de negócio) + DTOs em
+> `Application/Data/`, sem uma `AuthServiceInterface` própria, porque nada fora
+> do módulo depende dele por classe concreta hoje (ver
+> `docs/convencoes-arquitetura.md`). Se um consumidor externo de `Auth` surgir
+> antes da extração, criar a interface nesse momento, não antes.
 
 ## Plano de extração para microserviços
 
@@ -78,10 +92,10 @@ Além disso, `PlanServiceInterface` (limites/uso: `hasReachedLimit`,
 equivalentes no momento em que `App` (consumidor de `plan.limit`) for extraído
 para outro processo.
 
-**`Auth`** (`AuthServiceInterface`, hoje resolvida localmente por
-`Modules\Auth\Services\AuthService`): quando `Subscription`/`App` forem
-serviços separados, precisarão validar o usuário autenticado sem acesso direto
-à tabela `users`. O contrato interno a expor nesse momento é:
+**`Auth`** (`Application/AuthApplication.php`, sem interface própria hoje — ver
+nota acima): quando `Subscription`/`App` forem serviços separados, precisarão
+validar o usuário autenticado sem acesso direto à tabela `users`. O contrato
+interno a expor nesse momento é:
 - `GET /v1/internal/users/{id}` — dados básicos do usuário (id, email,
   user_type), protegido por `X-Internal-Key`
 - Validação de token Sanctum via endpoint interno (ou migração para um formato
