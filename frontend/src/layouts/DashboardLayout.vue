@@ -1,10 +1,12 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useAuthStore } from '../stores/auth'
+import { useSidebarStore } from '../stores/sidebar'
 import Sidebar from '../components/Sidebar.vue'
 import { strings } from '../strings/pt-BR'
 
 const authStore = useAuthStore()
+const sidebarStore = useSidebarStore()
 const loading = ref(true)
 
 onMounted(async () => {
@@ -21,7 +23,7 @@ onMounted(async () => {
 <template>
   <p v-if="loading" class="dashboard-layout__loading">{{ strings.dashboard.loading }}</p>
 
-  <div v-else class="dashboard-layout">
+  <div v-else class="dashboard-layout" :class="{ 'dashboard-layout--collapsed': sidebarStore.collapsed }">
     <Sidebar />
     <main class="dashboard-layout__main">
       <RouterView />
@@ -48,13 +50,20 @@ onMounted(async () => {
   margin-left: 220px;
   flex: 1;
   padding: 40px 36px;
+  min-width: 0;
+  transition: margin-left 0.2s ease;
+}
+.dashboard-layout--collapsed .dashboard-layout__main {
+  margin-left: 72px;
 }
 
 @media (max-width: 860px) {
-  .dashboard-layout {
+  .dashboard-layout,
+  .dashboard-layout--collapsed {
     flex-direction: column;
   }
-  .dashboard-layout__main {
+  .dashboard-layout__main,
+  .dashboard-layout--collapsed .dashboard-layout__main {
     margin-left: 0;
     padding: 24px 20px;
     max-width: 100%;

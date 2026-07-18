@@ -2,8 +2,13 @@
 
 namespace Modules\App\Providers;
 
+use Modules\App\Application\MembroApplication;
+use Modules\App\Http\Controllers\MembroController;
+use Modules\App\Interfaces\MembroApplicationInterface;
+use Modules\App\Interfaces\MembroControllerInterface;
+use Modules\App\Interfaces\MembroRepositoryInterface;
+use Modules\App\Repositories\MembroRepository;
 use Nwidart\Modules\Support\ModuleServiceProvider;
-use Illuminate\Console\Scheduling\Schedule;
 
 class AppServiceProvider extends ModuleServiceProvider
 {
@@ -35,8 +40,20 @@ class AppServiceProvider extends ModuleServiceProvider
     ];
 
     /**
+     * Register the service provider.
+     */
+    public function register(): void
+    {
+        $this->app->bind(MembroRepositoryInterface::class, MembroRepository::class);
+        $this->app->bind(MembroApplicationInterface::class, MembroApplication::class);
+        $this->app->bind(MembroControllerInterface::class, MembroController::class);
+
+        parent::register();
+    }
+
+    /**
      * Define module schedules.
-     * 
+     *
      * @param $schedule
      */
     // protected function configureSchedules(Schedule $schedule): void
