@@ -1,10 +1,15 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useSidebarStore } from '../stores/sidebar'
+import { useMembrosStore } from '../stores/membros'
+import { isAniversarioHoje } from '../utils/aniversariantes'
 import { strings } from '../strings/pt-BR'
 
 const authStore = useAuthStore()
+const sidebarStore = useSidebarStore()
+const membrosStore = useMembrosStore()
 const router = useRouter()
 
 async function handleLogout() {
@@ -12,12 +17,27 @@ async function handleLogout() {
   router.push({ name: 'login' })
 }
 
-const navItems = [
+onMounted(() => {
+  // Garante o badge certo mesmo se o usuário cair direto no Dashboard,
+  // sem passar pela tela de Aniversariantes primeiro.
+  membrosStore.fetchMembros()
+})
+
+const aniversariantesHojeCount = computed(
+  () => membrosStore.membros.filter((m) => m.ativo && isAniversarioHoje(m.data_nascimento)).length,
+)
+
+const navItems = computed(() => [
   { icon: 'bi-speedometer2', key: 'dashboard', to: { name: 'dashboard' } },
-  { icon: 'bi-cake2-fill', key: 'birthdays', badge: 1 },
+  {
+    icon: 'bi-cake2-fill',
+    key: 'birthdays',
+    to: { name: 'aniversariantes' },
+    badge: aniversariantesHojeCount.value,
+  },
   { icon: 'bi-pencil-square', key: 'captions' },
   { icon: 'bi-gear-fill', key: 'settings' },
-]
+])
 
 const initials = computed(() =>
   (authStore.user?.name || '')
@@ -31,17 +51,25 @@ const initials = computed(() =>
 const roleLabel = computed(
   () => strings.dashboard.roles[authStore.user?.user_type] || strings.dashboard.roles.fallback,
 )
+
+const toggleTitle = computed(() =>
+  sidebarStore.collapsed ? strings.dashboard.expandSidebar : strings.dashboard.collapseSidebar,
+)
 </script>
 
 <template>
-  <aside class="sidebar">
+  <aside class="sidebar" :class="{ 'sidebar--collapsed': sidebarStore.collapsed }">
     <div class="sidebar__logo">
       <div class="sidebar__logo-mark"><i class="bi bi-stars" aria-hidden="true"></i></div>
-      <div>
+      <div v-if="!sidebarStore.collapsed" class="sidebar__logo-text">
         <div class="sidebar__logo-name">{{ strings.common.brand }}</div>
         <div class="sidebar__logo-sub">{{ strings.dashboard.logoSub }}</div>
       </div>
     </div>
+
+    <button type="button" class="sidebar__toggle" :title="toggleTitle" :aria-label="toggleTitle" @click="sidebarStore.toggle()">
+      <i class="bi" :class="sidebarStore.collapsed ? 'bi-chevron-right' : 'bi-chevron-left'" aria-hidden="true"></i>
+    </button>
 
     <nav class="sidebar__nav">
       <RouterLink
@@ -49,32 +77,35 @@ const roleLabel = computed(
         :key="item.key"
         :to="item.to"
         class="nav-item"
-        active-class="nav-item--active"
+        exact-active-class="nav-item--active"
+        :title="sidebarStore.collapsed ? strings.dashboard.nav[item.key] : null"
       >
         <i class="nav-item__icon bi" :class="item.icon" aria-hidden="true"></i>
-        {{ strings.dashboard.nav[item.key] }}
-        <span v-if="item.badge" class="nav-item__badge">{{ item.badge }}</span>
+        <span v-if="!sidebarStore.collapsed" class="nav-item__label">{{ strings.dashboard.nav[item.key] }}</span>
+        <span v-if="item.badge && !sidebarStore.collapsed" class="nav-item__badge">{{ item.badge }}</span>
       </RouterLink>
       <span
         v-for="item in navItems.filter((i) => !i.to)"
         :key="item.key"
         class="nav-item nav-item--disabled"
-        :title="strings.dashboard.nav.comingSoon"
+        :title="sidebarStore.collapsed ? strings.dashboard.nav[item.key] : strings.dashboard.nav.comingSoon"
       >
         <i class="nav-item__icon bi" :class="item.icon" aria-hidden="true"></i>
-        {{ strings.dashboard.nav[item.key] }}
-        <span v-if="item.badge" class="nav-item__badge">{{ item.badge }}</span>
+        <span v-if="!sidebarStore.collapsed" class="nav-item__label">{{ strings.dashboard.nav[item.key] }}</span>
+        <span v-if="item.badge && !sidebarStore.collapsed" class="nav-item__badge">{{ item.badge }}</span>
       </span>
     </nav>
 
-    <button type="button" class="sidebar__footer" :title="strings.dashboard.logout">
+    <div class="sidebar__footer">
       <span class="avatar">{{ initials }}</span>
-      <span class="sidebar__footer-info">
+      <span v-if="!sidebarStore.collapsed" class="sidebar__footer-info">
         <span class="sidebar__footer-name">{{ authStore.user?.name }}</span>
         <span class="sidebar__footer-role">{{ roleLabel }}</span>
       </span>
-      <i class="sidebar__footer-logout bi bi-box-arrow-right" aria-hidden="true" @click="handleLogout"></i>
-    </button>
+      <button type="button" class="sidebar__footer-logout" :title="strings.dashboard.logout" @click="handleLogout">
+        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+      </button>
+    </div>
   </aside>
 </template>
 
@@ -90,6 +121,10 @@ const roleLabel = computed(
   position: fixed;
   top: 0;
   left: 0;
+  transition: width 0.2s ease;
+}
+.sidebar--collapsed {
+  width: 72px;
 }
 
 .sidebar__logo {
@@ -98,6 +133,10 @@ const roleLabel = computed(
   align-items: center;
   gap: 11px;
   border-bottom: 1px solid var(--border);
+}
+.sidebar--collapsed .sidebar__logo {
+  padding: 26px 0 22px;
+  justify-content: center;
 }
 .sidebar__logo-mark {
   width: 34px;
@@ -111,6 +150,9 @@ const roleLabel = computed(
   color: #fff;
   flex-shrink: 0;
 }
+.sidebar__logo-text {
+  min-width: 0;
+}
 .sidebar__logo-name {
   font-size: 14px;
   font-weight: 700;
@@ -121,6 +163,29 @@ const roleLabel = computed(
   font-size: 11px;
   color: var(--text);
   opacity: 0.7;
+}
+
+.sidebar__toggle {
+  position: absolute;
+  top: 32px;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  z-index: 2;
+}
+.sidebar__toggle:hover {
+  color: var(--accent);
+  border-color: var(--accent-border);
 }
 
 .sidebar__nav {
@@ -143,6 +208,10 @@ const roleLabel = computed(
   font-size: 13.5px;
   transition: all 0.15s;
 }
+.sidebar--collapsed .nav-item {
+  justify-content: center;
+  padding: 10px;
+}
 .nav-item--active,
 .nav-item:not(.nav-item--disabled):hover {
   background: var(--accent-bg);
@@ -157,6 +226,11 @@ const roleLabel = computed(
   width: 22px;
   text-align: center;
   flex-shrink: 0;
+}
+.nav-item__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .nav-item__badge {
   margin-left: auto;
@@ -174,15 +248,10 @@ const roleLabel = computed(
   display: flex;
   align-items: center;
   gap: 10px;
-  cursor: pointer;
-  border: none;
-  background: none;
-  width: 100%;
-  text-align: left;
-  transition: background 0.15s;
 }
-.sidebar__footer:hover {
-  background: var(--accent-bg);
+.sidebar--collapsed .sidebar__footer {
+  justify-content: center;
+  padding: 14px 8px;
 }
 .avatar {
   width: 33px;
@@ -217,27 +286,42 @@ const roleLabel = computed(
   opacity: 0.7;
 }
 .sidebar__footer-logout {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  border-radius: 7px;
   font-size: 15px;
   color: var(--text);
   opacity: 0.6;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition:
     color 0.15s,
-    opacity 0.15s;
+    opacity 0.15s,
+    background 0.15s;
 }
 .sidebar__footer-logout:hover {
   color: #ef4444;
   opacity: 1;
+  background: rgba(239, 68, 68, 0.1);
 }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 860px) {
-  .sidebar {
+  .sidebar,
+  .sidebar--collapsed {
     position: static;
     width: 100%;
     min-height: auto;
     flex-direction: row;
     align-items: center;
+  }
+  .sidebar__toggle {
+    display: none;
   }
   .sidebar__logo {
     border-bottom: none;
