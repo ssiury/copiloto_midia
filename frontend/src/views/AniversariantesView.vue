@@ -25,7 +25,7 @@ onMounted(async () => {
     await membrosStore.fetchMembros()
   } catch {
     erroAoCarregar.value = true
-    toastStore.show(strings.aniversariantes.loadError, '⚠️')
+    toastStore.show(strings.aniversariantes.loadError, 'bi-exclamation-triangle-fill')
   }
 })
 
@@ -97,15 +97,18 @@ async function salvarMembro(dados) {
   try {
     if (membroEditando.value) {
       await membrosStore.atualizar(membroEditando.value.id, dados)
-      toastStore.show(strings.aniversariantes.toasts.atualizado, '✅')
+      toastStore.show(strings.aniversariantes.toasts.atualizado, 'bi-check-circle-fill')
     } else {
       await membrosStore.criar(dados)
-      toastStore.show(strings.aniversariantes.toasts.cadastrado, '🎉')
+      toastStore.show(strings.aniversariantes.toasts.cadastrado, 'bi-stars')
     }
 
     modalFormAberto.value = false
   } catch (error) {
-    toastStore.show(error.response?.data?.error?.message || strings.aniversariantes.toasts.erroSalvar, '⚠️')
+    toastStore.show(
+      error.response?.data?.error?.message || strings.aniversariantes.toasts.erroSalvar,
+      'bi-exclamation-triangle-fill',
+    )
   }
 }
 
@@ -120,9 +123,12 @@ function pedirDesativar(membro) {
 async function confirmarDesativar() {
   try {
     await membrosStore.desativar(membroDesativando.value.id)
-    toastStore.show(strings.aniversariantes.toasts.desativado, '🔕')
+    toastStore.show(strings.aniversariantes.toasts.desativado, 'bi-bell-slash-fill')
   } catch (error) {
-    toastStore.show(error.response?.data?.error?.message || strings.aniversariantes.toasts.erroDesativar, '⚠️')
+    toastStore.show(
+      error.response?.data?.error?.message || strings.aniversariantes.toasts.erroDesativar,
+      'bi-exclamation-triangle-fill',
+    )
   } finally {
     modalConfirmAberto.value = false
   }
@@ -153,6 +159,7 @@ async function confirmarDesativar() {
       :class="{ 'filter-btn--active': filtro === opcao }"
       @click="filtro = opcao"
     >
+      <i v-if="opcao === 'hoje'" class="bi bi-stars" aria-hidden="true"></i>
       {{ strings.aniversariantes.filtros[opcao] }}
     </button>
     <span v-if="listaFiltrada.length" class="filters__count">{{
@@ -165,7 +172,7 @@ async function confirmarDesativar() {
   </p>
 
   <div v-else-if="listaFiltrada.length === 0" class="empty-state">
-    <div class="empty-state__icon">🎂</div>
+    <i class="empty-state__icon bi bi-cake2-fill" aria-hidden="true"></i>
     <h3>{{ strings.aniversariantes.emptyState.title }}</h3>
     <p>{{ strings.aniversariantes.emptyState.text }}</p>
     <button type="button" class="btn btn--primary" @click="abrirCriar">
@@ -207,7 +214,7 @@ async function confirmarDesativar() {
 
   <ConfirmDialog
     :open="modalConfirmAberto"
-    icon="🗑️"
+    icon="bi-trash-fill"
     :title="strings.aniversariantes.modalConfirm.titulo"
     :text="strings.aniversariantes.modalConfirm.texto"
     :confirm-label="strings.aniversariantes.modalConfirm.confirmar"
@@ -348,6 +355,7 @@ async function confirmarDesativar() {
   padding: 80px 20px;
 }
 .empty-state__icon {
+  display: block;
   font-size: 48px;
   margin-bottom: 16px;
   opacity: 0.5;

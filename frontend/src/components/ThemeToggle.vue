@@ -13,7 +13,7 @@ const themeStore = useThemeStore()
     :title="themeStore.theme === 'dark' ? strings.themeToggle.enableLight : strings.themeToggle.enableDark"
     @click="themeStore.toggle()"
   >
-    {{ themeStore.theme === 'dark' ? '☀️' : '🌙' }}
+    <i class="bi" :class="themeStore.theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'" aria-hidden="true"></i>
   </button>
 </template>
 

@@ -6,7 +6,7 @@ const toastStore = useToastStore()
 
 <template>
   <div class="toast-box" :class="{ 'toast-box--show': toastStore.visible }" role="status" aria-live="polite">
-    <span class="toast-box__icon">{{ toastStore.icon }}</span>
+    <i class="toast-box__icon bi" :class="toastStore.icon" aria-hidden="true"></i>
     <span>{{ toastStore.message }}</span>
   </div>
 </template>

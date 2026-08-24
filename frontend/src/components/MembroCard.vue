@@ -22,12 +22,12 @@ const cor = computed(() => corAvatar(props.membro.nome))
 
 const countdown = computed(() => {
   if (ehHoje.value) {
-    return { classe: 'countdown--hoje', texto: strings.aniversariantes.card.hojeBadge }
+    return { classe: 'countdown--hoje', icone: 'bi-stars', texto: strings.aniversariantes.card.hojeBadge }
   }
   if (dias.value <= 7) {
-    return { classe: 'countdown--breve', texto: strings.aniversariantes.card.emDias(dias.value) }
+    return { classe: 'countdown--breve', icone: null, texto: strings.aniversariantes.card.emDias(dias.value) }
   }
-  return { classe: 'countdown--distante', texto: strings.aniversariantes.card.emDias(dias.value) }
+  return { classe: 'countdown--distante', icone: null, texto: strings.aniversariantes.card.emDias(dias.value) }
 })
 
 const dataFormatada = computed(() =>
@@ -49,7 +49,7 @@ const idadeTexto = computed(() =>
     >
       <img v-if="membro.foto" :src="`data:${membro.foto_tipo};base64,${membro.foto}`" :alt="membro.nome" />
       <span v-else>{{ iniciaisNome(membro.nome) }}</span>
-      <div v-if="ehHoje" class="member-card__today-badge">🎂</div>
+      <i v-if="ehHoje" class="member-card__today-badge bi bi-cake2-fill" aria-hidden="true"></i>
     </div>
 
     <div class="member-card__info">
@@ -60,7 +60,10 @@ const idadeTexto = computed(() =>
         }}</span>
       </div>
       <div class="member-card__date">{{ dataFormatada }}{{ idadeTexto }}</div>
-      <div class="member-card__countdown" :class="countdown.classe">{{ countdown.texto }}</div>
+      <div class="member-card__countdown" :class="countdown.classe">
+        <i v-if="countdown.icone" class="bi" :class="countdown.icone" aria-hidden="true"></i>
+        {{ countdown.texto }}
+      </div>
     </div>
 
     <div class="member-card__actions">

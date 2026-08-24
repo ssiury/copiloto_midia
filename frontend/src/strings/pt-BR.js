@@ -142,11 +142,11 @@ export const strings = {
     },
     greeting: {
       morning: 'Bom dia',
-      morningEmoji: '☀️',
+      morningEmoji: 'bi-sun-fill',
       afternoon: 'Boa tarde',
-      afternoonEmoji: '🙏',
+      afternoonEmoji: 'bi-sun-fill',
       evening: 'Boa noite',
-      eveningEmoji: '🌙',
+      eveningEmoji: 'bi-moon-stars-fill',
       subtitlePrefix: 'Você tem',
       subtitleScheduled: (count) => `${count} publicações agendadas`,
       subtitleMiddle: 'para hoje e',
@@ -160,7 +160,8 @@ export const strings = {
     },
     birthdayBanner: {
       titleSuffix: 'faz aniversário hoje!',
-      cta: '🎉 Ver Arte',
+      defaultNote: 'A arte e a legenda estão prontas para aprovação.',
+      cta: 'Ver Arte',
     },
     agenda: {
       sectionTitle: 'Agenda de Hoje',
@@ -182,7 +183,7 @@ export const strings = {
     searchPlaceholder: 'Buscar membro...',
     filtros: {
       todos: 'Todos',
-      hoje: '🎉 Hoje',
+      hoje: 'Hoje',
       mes: 'Este mês',
       inativos: 'Inativos',
     },
@@ -193,7 +194,7 @@ export const strings = {
     },
     card: {
       inativoBadge: 'Inativo',
-      hojeBadge: '🎉 Hoje!',
+      hojeBadge: 'Hoje!',
       emDias: (dias) => `em ${dias} dia${dias === 1 ? '' : 's'}`,
       anos: (idade) => `${idade} anos`,
       editar: 'Editar',

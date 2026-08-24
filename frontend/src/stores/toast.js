@@ -5,12 +5,12 @@ let hideTimer = null
 export const useToastStore = defineStore('toast', {
   state: () => ({
     message: '',
-    icon: '✅',
+    icon: 'bi-check-circle-fill',
     visible: false,
   }),
 
   actions: {
-    show(message, icon = '✅') {
+    show(message, icon = 'bi-check-circle-fill') {
       clearTimeout(hideTimer)
       this.message = message
       this.icon = icon
