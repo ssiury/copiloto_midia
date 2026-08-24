@@ -65,7 +65,8 @@ onMounted(async () => {
   .dashboard-layout__main,
   .dashboard-layout--collapsed .dashboard-layout__main {
     margin-left: 0;
-    padding: 24px 20px;
+    /* espaço para o header fixo no topo e a tab bar fixa embaixo do Sidebar */
+    padding: calc(24px + 60px) 20px calc(24px + 64px + env(safe-area-inset-bottom, 0px));
     max-width: 100%;
   }
 }
