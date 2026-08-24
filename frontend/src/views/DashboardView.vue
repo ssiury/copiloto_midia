@@ -1,9 +1,22 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth'
+import { useMembrosStore } from '../stores/membros'
+import { useToastStore } from '../stores/toast'
 import { strings } from '../strings/pt-BR'
+import { isAniversarioHoje, isAniversarioNoMes } from '../utils/aniversariantes'
 
 const authStore = useAuthStore()
+const membrosStore = useMembrosStore()
+const toastStore = useToastStore()
+
+onMounted(async () => {
+  try {
+    await membrosStore.fetchMembros()
+  } catch {
+    toastStore.show(strings.aniversariantes.loadError, 'bi-exclamation-triangle-fill')
+  }
+})
 
 const firstName = computed(() => authStore.user?.name?.split(' ')[0] || '')
 
@@ -27,20 +40,33 @@ const dateLabel = computed(() => {
   return formatted.charAt(0).toUpperCase() + formatted.slice(1)
 })
 
-// TODO: dados de placeholder até existirem endpoints reais de posts/agenda/aniversariantes.
 const scheduledCount = 2
-const birthdayCount = 1
 
-const stats = [
-  { icon: '📸', value: 12, key: 'postsThisMonth', color: 'accent' },
-  { icon: '📅', value: 5, key: 'scheduled', color: 'gold' },
-  { icon: '🎂', value: 4, key: 'birthdaysThisMonth', color: 'green' },
-]
+const membrosAtivos = computed(() => membrosStore.membros.filter((m) => m.ativo))
+const aniversariantesHoje = computed(() =>
+  membrosAtivos.value.filter((m) => isAniversarioHoje(m.data_nascimento)),
+)
+const aniversariantesNoMes = computed(() =>
+  membrosAtivos.value.filter((m) => isAniversarioNoMes(m.data_nascimento)),
+)
 
-const birthdayToday = {
-  name: 'Maria Santos',
-  note: 'A arte e a legenda estão prontas para aprovação.',
-}
+const birthdayCount = computed(() => aniversariantesHoje.value.length)
+
+const stats = computed(() => [
+  { icon: 'bi-camera-fill', value: 12, key: 'postsThisMonth', color: 'accent' },
+  { icon: 'bi-calendar-event-fill', value: 5, key: 'scheduled', color: 'gold' },
+  { icon: 'bi-cake2-fill', value: aniversariantesNoMes.value.length, key: 'birthdaysThisMonth', color: 'green' },
+])
+
+const birthdayToday = computed(() => {
+  const membro = aniversariantesHoje.value[0]
+  if (!membro) return null
+
+  return {
+    name: membro.nome,
+    note: strings.dashboard.birthdayBanner.defaultNote,
+  }
+})
 
 const events = [
   {
@@ -77,7 +103,8 @@ const events = [
       {{ dateLabel }}
     </div>
     <h1 class="greeting__title">
-      {{ greeting.text }}, <span class="greeting__name">{{ firstName }}</span> {{ greeting.emoji }}
+      {{ greeting.text }}, <span class="greeting__name me-2">{{ firstName }}</span>
+      <i class="bi" :class="greeting.emoji" aria-hidden="true"></i>
     </h1>
     <p class="greeting__sub">
       {{ strings.dashboard.greeting.subtitlePrefix }}
@@ -90,7 +117,9 @@ const events = [
 
   <div class="summary-row">
     <div v-for="stat in stats" :key="stat.key" class="sum-card panel">
-      <div class="sum-card__icon" :class="`sum-card__icon--${stat.color}`">{{ stat.icon }}</div>
+      <div class="sum-card__icon" :class="`sum-card__icon--${stat.color}`">
+        <i class="bi" :class="stat.icon" aria-hidden="true"></i>
+      </div>
       <div>
         <div class="sum-card__value" :class="`text-${stat.color}`">{{ stat.value }}</div>
         <div class="sum-card__label">{{ strings.dashboard.stats[stat.key] }}</div>
@@ -99,12 +128,14 @@ const events = [
   </div>
 
   <div v-if="birthdayToday" class="bday-banner">
-    <div class="bday-banner__emoji">🎂</div>
+    <i class="bday-banner__emoji bi bi-cake2-fill" aria-hidden="true"></i>
     <div class="bday-banner__text">
       <strong>{{ birthdayToday.name }} {{ strings.dashboard.birthdayBanner.titleSuffix }}</strong>
       <p>{{ birthdayToday.note }}</p>
     </div>
-    <button type="button" class="btn btn--gold">{{ strings.dashboard.birthdayBanner.cta }}</button>
+    <button type="button" class="btn btn--gold">
+      <i class="bi bi-stars" aria-hidden="true"></i> {{ strings.dashboard.birthdayBanner.cta }}
+    </button>
   </div>
 
   <div class="divider" />

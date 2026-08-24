@@ -66,11 +66,11 @@ function selecionarFoto(event) {
 
 function salvar() {
   if (!nome.value.trim()) {
-    toastStore.show(strings.aniversariantes.toasts.nomeObrigatorio, '⚠️')
+    toastStore.show(strings.aniversariantes.toasts.nomeObrigatorio, 'bi-exclamation-triangle-fill')
     return
   }
   if (!dataNascimento.value) {
-    toastStore.show(strings.aniversariantes.toasts.dataObrigatoria, '⚠️')
+    toastStore.show(strings.aniversariantes.toasts.dataObrigatoria, 'bi-exclamation-triangle-fill')
     return
   }
 

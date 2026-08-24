@@ -1,7 +1,7 @@
 <script setup>
 defineProps({
   open: { type: Boolean, default: false },
-  icon: { type: String, default: '⚠️' },
+  icon: { type: String, default: 'bi-exclamation-triangle-fill' },
   title: { type: String, required: true },
   text: { type: String, required: true },
   confirmLabel: { type: String, required: true },
@@ -15,7 +15,7 @@ const emit = defineEmits(['confirm', 'cancel'])
   <div v-if="open" class="app-modal-backdrop" @click.self="emit('cancel')">
     <div class="app-modal app-modal--confirm">
       <div class="app-modal__body app-modal__body--confirm">
-        <div class="app-modal__confirm-icon">{{ icon }}</div>
+        <i class="app-modal__confirm-icon bi" :class="icon" aria-hidden="true"></i>
         <h3>{{ title }}</h3>
         <p>{{ text }}</p>
       </div>
@@ -54,6 +54,7 @@ const emit = defineEmits(['confirm', 'cancel'])
   padding: 28px 28px 0;
 }
 .app-modal__confirm-icon {
+  display: inline-block;
   font-size: 36px;
   margin: 8px 0 12px;
 }
