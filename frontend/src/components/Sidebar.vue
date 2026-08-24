@@ -314,19 +314,26 @@ const toggleTitle = computed(() =>
 @media (max-width: 860px) {
   .sidebar,
   .sidebar--collapsed {
-    position: static;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
     width: 100%;
     min-height: auto;
     flex-direction: row;
     align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
   }
   .sidebar__toggle {
     display: none;
   }
+
+  /* Header compacto fixo no topo: logo + avatar/logout */
   .sidebar__logo {
     border-bottom: none;
-    border-right: 1px solid var(--border);
-    padding: 14px 16px;
+    padding: 12px 16px;
     min-width: 0;
   }
   .sidebar__logo-name,
@@ -335,22 +342,50 @@ const toggleTitle = computed(() =>
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  /* Tab bar fixa embaixo, alcançável com o polegar */
   .sidebar__nav {
-    flex: 1;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    flex: none;
     flex-direction: row;
-    flex-wrap: nowrap;
-    padding: 8px;
-    overflow-x: auto;
+    justify-content: space-around;
+    align-items: stretch;
+    gap: 0;
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+    background: var(--panel-bg);
+    border-top: 1px solid var(--border);
   }
   .nav-item {
-    white-space: nowrap;
-    flex-shrink: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+    padding: 6px 2px;
+    text-align: center;
+    position: relative;
   }
+  .nav-item__label {
+    font-size: 10.5px;
+    max-width: 100%;
+  }
+  .nav-item__badge {
+    position: absolute;
+    top: 2px;
+    right: calc(50% - 22px);
+    margin-left: 0;
+  }
+
+  /* Avatar/logout ficam no header fixo do topo, ao lado da logo */
   .sidebar__footer {
     width: auto;
     flex-shrink: 0;
+    padding: 12px 16px;
     border-top: none;
-    border-left: 1px solid var(--border);
   }
   .sidebar__footer-info {
     display: none;
